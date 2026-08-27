@@ -183,7 +183,6 @@ y al seguidor de voltaje, finalmente se observa la señal de salida en la resist
 \end{figure}
 
 
-
 \subsection{Implementación experimental}
 
 Se implementó el circuito de manera experimental, dónde se verificó el funcionamiento de cada etapa,
@@ -273,6 +272,7 @@ un único pico referente a la frecuencia real de la señal.
     \label{fig:fft}
 \end{figure}
 
+\section{Cuestionario} \subsection{Proceso de muestreo periódico} El muestreo periódico consiste en tomar valores de una señal analógica $x_a(t)$ en intervalos uniformes de tiempo $T_s$, obteniendo una secuencia discreta: \[ x[n]=x_a(nT_s) \] donde la frecuencia de muestreo está definida por: \[ F_s=\frac{1}{T_s} \] Inicialmente se determina la máxima frecuencia presente en la señal $f_{\max}$ y se selecciona una frecuencia de muestreo que cumpla el criterio de Nyquist--Shannon: \[ F_s>2f_{\max} \] En la práctica, el NE555 configurado como multivibrador astable genera los pulsos de muestreo que controlan el interruptor bilateral CD4066. Este permite el paso de la señal analógica únicamente durante determinados intervalos, obteniéndose las muestras. Posteriormente, la señal pasa por una etapa RC y un seguidor de voltaje para realizar su reconstrucción. Para la señal senoidal utilizada de $5\,\text{kHz}$, la frecuencia mínima teórica de muestreo es: \[ F_{s,\min}=2(5\,\text{kHz})=10\,\text{kHz} \] \subsection{Fenómeno de \textit{aliasing}} El \textit{aliasing} ocurre cuando la frecuencia de muestreo no es suficiente para representar correctamente la señal analógica. Si: \[ F_s\leq2f_{\max} \] las réplicas espectrales generadas durante el muestreo pueden superponerse, produciendo componentes de frecuencia que no representan adecuadamente la señal original e impidiendo su reconstrucción exacta. Para la señal experimental de $5\,\text{kHz}$ se requieren al menos $10\,\text{kHz}$. Al utilizar $F_s=2.5\,\text{kHz}$ se trabajó únicamente con el $25\,\%$ de la frecuencia mínima requerida: \[ \frac{2.5}{10}\times100=25\,\% \] En esta condición se presentó una elevada distorsión y múltiples componentes en la FFT. Al incrementar $F_s$ a $21.9$, $54.5$, $170$ y aproximadamente $300\,\text{kHz}$, la señal reconstruida se aproximó progresivamente a la señal senoidal original. \subsection{Frecuencia máxima teórica de la señal analógica} Para el NE555 en configuración astable, la frecuencia de oscilación puede aproximarse mediante: \[ F_s=\frac{1.44}{(R_A+2R_B)C} \] Considerando para la máxima frecuencia: \[ R_A=1\,\text{k}\Omega,\qquad R_B=1\,\text{k}\Omega,\qquad C=10\,\text{nF} \] se obtiene: \[ F_{s,\max}= \frac{1.44} {[1\,\text{k}\Omega+2(1\,\text{k}\Omega)](10\,\text{nF})} \] \[ F_{s,\max}\approx48\,\text{kHz} \] Los tiempos de nivel alto y bajo son: \[ t_H=0.693(R_A+R_B)C\approx13.86\,\mu s \] \[ t_L=0.693R_BC\approx6.93\,\mu s \] por lo tanto: \[ T=t_H+t_L\approx20.79\,\mu s \] Aplicando Nyquist--Shannon: \[ f_{\max}<\frac{F_{s,\max}}{2} \] \[ \boxed{f_{\max}<24\,\text{kHz}} \] Por lo tanto, teóricamente el sistema puede muestrear sin \textit{aliasing} señales analógicas con frecuencias inferiores a aproximadamente $24\,\text{kHz}$. \subsection{Tipo de retenedor empleado} En la práctica se empleó una etapa equivalente a un retenedor de orden cero (ZOH, \textit{Zero-Order Hold}), cuya función es mantener aproximadamente el valor de cada muestra hasta la llegada de la siguiente. La etapa está constituida por una resistencia de $1\,\text{k}\Omega$, un capacitor de $1\,\text{nF}$ y un amplificador operacional configurado como seguidor de voltaje. El capacitor almacena temporalmente el nivel de tensión, mientras que el seguidor proporciona aislamiento entre el circuito RC y la carga. La frecuencia de corte del circuito RC es: \[ f_c=\frac{1}{2\pi RC} \] \[ f_c= \frac{1}{2\pi(1\,\text{k}\Omega)(1\,\text{nF})} \approx159.15\,\text{kHz} \] \subsection{Constante de tiempo y carga del capacitor al 98\%} La constante de tiempo del circuito retenedor está determinada por: \[ \tau=RC \] Para $R=1\,\text{k}\Omega$ y $C=1\,\text{nF}$: \[ \tau=(1000)(1\times10^{-9}) =1\,\mu s \] La carga del capacitor está dada por: \[ V_C(t)=V_f\left(1-e^{-t/\tau}\right) \] Para alcanzar el $98\,\%$ del valor final: \[ 0.98=1-e^{-t/\tau} \] \[ t=-\tau\ln(0.02) \] \[ t=3.912\tau \] Por lo tanto: \[ \boxed{t_{98\%}\approx3.91\,\mu s} \] De manera práctica puede aproximarse a $4\tau$, donde el capacitor alcanza aproximadamente el $98.17\,\%$ de su tensión final. \subsection{Comportamiento cuando $\tau>T_s$} Cuando aumenta la frecuencia de muestreo, disminuye su período: \[ T_s=\frac{1}{F_s} \] Si la constante de tiempo del circuito cumple: \[ \tau>T_s \] el capacitor no dispone del tiempo suficiente para alcanzar completamente el valor de una muestra antes de recibir la siguiente. Esto genera una respuesta más suavizada, pero también produce atenuación y retardo en la señal reconstruida. La tensión alcanzada durante un período de muestreo puede expresarse como: \[ V_C(T_s)=V_f\left(1-e^{-T_s/\tau}\right) \] Por ejemplo, si $\tau=1\,\mu s$ y $F_s=2\,\text{MHz}$: \[ T_s=0.5\,\mu s \] entonces: \[ \frac{V_C(T_s)}{V_f} =1-e^{-0.5} \approx0.393 \] Esto indica que el capacitor alcanzaría aproximadamente el $39.3\,\%$ de la variación antes de recibir la siguiente muestra. Por esta razón, una constante de tiempo excesivamente grande puede suavizar la señal, pero también impedir que el circuito siga adecuadamente sus cambios de amplitud.
 
 % =========================================================
 % VII. CONCLUSIONES
@@ -280,18 +280,17 @@ un único pico referente a la frecuencia real de la señal.
 
 \section{Conclusiones}
 
-\begin{itemize}
+\begin{enumerate}
 
-    \item Se logró implementar el sistema propuesto
-    de acuerdo con los objetivos establecidos.
+    \item Se verificó experimentalmente el criterio de Nyquist--Shannon utilizando una señal senoidal de entrada de $f_{xa}=5\,\text{kHz}$, para la cual la frecuencia mínima teórica de muestreo corresponde a $2f_{xa}=10\,\text{kHz}$. Al trabajar con frecuencias de muestreo superiores a este valor, específicamente $F_s=21.9\,\text{kHz}$, $54.5\,\text{kHz}$, $170\,\text{kHz}$ y aproximadamente $300\,\text{kHz}$, se observó una mejora progresiva en la reconstrucción de la señal. Estas frecuencias equivalen aproximadamente a 4.38, 10.9, 34 y 60 muestras por período de la señal de entrada, respectivamente. La reconstrucción obtenida con $F_s \approx 300\,\text{kHz}$ presentó la mayor similitud con la señal senoidal original, evidenciando que, aunque superar el límite de Nyquist permite conservar la información frecuencial, utilizar una frecuencia de muestreo considerablemente mayor mejora la representación temporal de la señal.
 
-    \item Los resultados experimentales permitieron
-    verificar el comportamiento esperado del sistema.
+    \item El fenómeno de \textit{aliasing} se evidenció cuando se empleó una frecuencia de muestreo de $F_s=2.5\,\text{kHz}$, valor que corresponde únicamente al $25\,\%$ de la frecuencia mínima de Nyquist requerida para la señal de $5\,\text{kHz}$. Bajo esta condición, la frecuencia de muestreo fue incluso menor que la propia frecuencia de la señal de entrada, por lo que no se contó con suficientes muestras para representar correctamente cada período. Experimentalmente, esta condición produjo una señal reconstruida considerablemente distorsionada y, mediante la Transformada Rápida de Fourier (FFT), se observaron múltiples componentes espectrales alrededor de la frecuencia fundamental. Esto confirmó que una frecuencia de muestreo insuficiente ocasiona pérdida de información e impide recuperar adecuadamente la señal analógica original.
 
-    \item Se identificaron las principales fuentes
-    de error y sus efectos sobre las mediciones.
+    \item La comparación de las señales obtenidas para $F_s=21.9\,\text{kHz}$, $54.5\,\text{kHz}$, $170\,\text{kHz}$ y $300\,\text{kHz}$ permitió establecer que el cumplimiento de la condición $F_s>2f_{xa}$ representa un requisito mínimo, pero no implica necesariamente una reproducción temporal idéntica de la señal original. Con $F_s=21.9\,\text{kHz}$ se obtuvieron aproximadamente 4.38 muestras por ciclo de la señal de $5\,\text{kHz}$; al incrementar $F_s$ a $54.5\,\text{kHz}$ se alcanzaron cerca de 10.9 muestras por ciclo, mientras que para $170\,\text{kHz}$ y $300\,\text{kHz}$ se obtuvieron aproximadamente 34 y 60 muestras por ciclo, respectivamente. Este incremento en la densidad de muestras permitió representar con mayor precisión las variaciones de amplitud de la señal senoidal, explicando la mejora observada experimentalmente en la señal reconstruida.
 
-\end{itemize}
+    \item El análisis mediante la Transformada Rápida de Fourier permitió complementar las observaciones realizadas en el dominio del tiempo. Para la condición de muestreo insuficiente de $F_s=2.5\,\text{kHz}$ se observaron diferentes componentes espectrales asociadas a la distorsión de la señal; posteriormente, al incrementar la frecuencia de muestreo, dichas componentes se desplazaron progresivamente respecto a la frecuencia fundamental. Para las frecuencias de muestreo más elevadas, el espectro presentó un comportamiento dominado principalmente por el pico correspondiente a la frecuencia real de la señal. Por lo tanto, los resultados obtenidos en los dominios temporal y frecuencial demostraron que incrementar la relación $F_s/f_{xa}$ favorece la separación entre la componente útil y las componentes generadas durante el proceso de muestreo, facilitando la posterior reconstrucción de la señal mediante el filtro pasabajas y el seguidor de voltaje.
+
+\end{enumerate}
 
 
 % =========================================================
@@ -321,6 +320,22 @@ Serie Documentos de Trabajo, no. 582, 2015.
 J. A. C. Osorio, H. B. C. Garzón y J. A. C. Osorio,
 ``Fundamentos y aplicación del muestreo en señales ubicadas en las bandas altas del espectro,''
 \textit{Scientia Et Technica}, vol. 14, no. 39, pp. 37--42, 2008.
+
+\bibitem{fadali}
+S. Fadali y A. Visioli,
+\textit{Digital Control Engineering - Analysis and Design}, 2.ª ed.
+
+\bibitem{garcia}
+L. E. García,
+\textit{Control Digital - Teoría y Práctica}, 2.ª ed.
+
+\bibitem{alvarado}
+J. P. Alvarado,
+\textit{Señales y Sistemas - Fundamentos Matemáticos}, 1.ª ed.
+
+\bibitem{astrom}
+K. J. Åström y B. Wittenmark,
+\textit{Computer-Controlled Systems - Theory and Design}, 3.ª ed.
 
 \end{thebibliography}
 
