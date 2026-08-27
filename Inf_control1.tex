@@ -6,7 +6,10 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage[spanish,es-nodecimaldot,es-noshorthands]{babel}
+\makeatletter
+\AtBeginDocument{\renewcommand{\es@sppercent}{\char37}}
+\makeatother
 
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -88,11 +91,8 @@ Aliasing, muestreo, retención, reconstrucción de señales, teorema de Nyquist-
 \section{Introducción}
 
 En los sistemas electrónicos y de control es frecuente trabajar con señales analógicas que deben ser procesadas mediante dispositivos digitales. Un sistema en tiempo discreto se define como un sistema que recibe una secuencia de valores de entrada $x[n]$ y la transforma en una secuencia de valores de salida $y[n]$ \cite{oppenheim}. Estos sistemas son dinámicos y sus variables pueden cambiar únicamente en determinados instantes, conocidos como muestreo \cite{cuero}. El muestreo se define como el proceso mediante el cual se representa una señal continua a través de un conjunto de muestras tomadas en determinados instantes de tiempo. La selección adecuada de la frecuencia de muestreo es necesaria para conservar la información contenida en la señal original \cite{ogata}.
-
 El teorema de muestreo de Nyquist--Shannon establece que una señal limitada en banda puede ser reconstruida a partir de sus muestras cuando la frecuencia mínima de muestreo es, como mínimo, el doble de su máxima componente frecuencial. Cuando esta condición no se cumple, se produce un fenómeno denominado aliasing \cite{semeria}, en el cual diferentes componentes de frecuencia de la señal original pueden generar representaciones indistinguibles en la señal muestreada, provocando una pérdida de información durante el proceso de digitalización \cite{osorio}.
-
 Además del muestreo, en la conversión de señales que tiene lugar en el sistema de control digital, se requiere una etapa de retención, cuya función es mantener el valor del pulso obtenido durante el proceso de muestreo durante un tiempo específico \cite{ogata}. El muestreador permite obtener la señal en instantes $(0, T, 2T, \ldots)$, donde $T$ corresponde al periodo de muestreo, mientras que el retenedor permite mantener el valor de cada muestra hasta el siguiente instante de muestreo. El retenedor más fundamental es el retenedor de orden cero, el cual mantiene constante el valor de la muestra entre dos instantes de muestreo consecutivos; la precisión de la reconstrucción mediante este tipo de retenedor depende de la magnitud del periodo de muestreo \cite{cuero}.
-
 Por lo anterior, la presente práctica de laboratorio tiene como objetivo analizar experimentalmente los procesos involucrados en la conversión de señales analógicas a digitales mediante el muestreo, retención y la reconstrucción de una señal. Para ello, se implementará un circuito de muestreo utilizando un temporizador NE555 y un interruptor bilateral CD4066, mediante los cuales se obtendrán muestras de una señal senoidal a diferentes frecuencias de muestreo. Posteriormente, se incorporará un circuito retenedor conformado por un filtro RC y un seguidor de voltaje, con el propósito de observar el comportamiento de la señal reconstruida. Finalmente, se analizaran las señales obtenidas mediante el osciloscopio, relacionando los resultados experimentales con los fundamentos del teorema de Nyquist - Shannon y el fenómeno del aliasing.
 
 
