@@ -42,18 +42,18 @@ CRITERIO DE NYQUIST-SHANNON Y ALIASING EN LA CONVERSIÓN DE SEÑALES ANALÓGICAS
 
 \author{
 \IEEEauthorblockN{
-Sneider Yamid Sanabria Alfonzo,
-Nombre del compañero 1,
-Nombre del compañero 2
+Jefferson Velasquez, 
+Sneider Sanabria,
+Daniela Calderón 
 }
 
 \IEEEauthorblockA{
 Ingeniería Electrónica\\
 Universidad de los Llanos\\
 Villavicencio, Colombia\\
-1@correo.com,
+jevelasquez.quevedo@correo.com,
 sy.salfonzo@unillanos.edu.co,
-3@correo.com
+dscalderon.moreno@unillanos.edu.co
 }
 }
 
@@ -65,23 +65,22 @@ sy.salfonzo@unillanos.edu.co,
 
 En este trabajo se presenta el análisis experimental de los procesos de muestreo
 y reconstrucción de señales analógicas, dónde se evaluó el cumplimiento 
-del teorema de muestreo de Nyquist-Shannon y el fenómeno de aliasing. Para ello, se 
+del teorema de muestreo de Nyquist-Shannon y el fenómeno de aliasing. Se 
 implementó un circuito oscilador basado en el temporizador NE555 y el interruptor 
 bilateral CD4066, mediante el cual se obtuvieron muestras de una señal senoidal de 
 5 kHz a diferentes frecuencias de muestreo. Posteriormente, se incorporó un circuito,
 conformado por un filtro pasabajas RC y un seguidor de voltaje, 
-con el objetivo de reconstruir la señal muestreada. Los resultados obtenidos mediante 
-osciloscopio permitió comparar la señal original con la señal reconstruida en cada 
-condición de muestreo, evidenciando que la reconstrucción adecuada de la señal depende 
-directamente de que la frecuencia de muestreo cumpla con el criterio de Nyquist, y que 
-su incumplimiento genera distorsión por aliasing.
+con el objetivo de reconstruir la señal muestreada. Los resultados medidos mediante el
+osciloscopio permitió comparar la señal original contra la señal reconstruida, en cada 
+condición de muestreo, se evidenció que la reconstrucción con una frecuencia de muestreo de $F_s\approx\SI{300}{\kilo\hertz}$
+es la que más se aproxima a la señal original, cumpliendo con el criterio de Nyquist-Shannon.
 
 \end{abstract}
 
 
 \begin{IEEEkeywords}
 
-Criterio de Nyquist-Shannon, aliasing, muestreo, retención, reconstrucción de señales.
+Aliasing, muestreo, retención, reconstrucción de señales, teorema de Nyquist-Shannon.
 
 \end{IEEEkeywords}
 
@@ -103,25 +102,38 @@ Por lo anterior, la presente práctica de laboratorio tiene como objetivo analiz
 
 \section{Fundamento teórico}
 
-\subsection{Concepto principal}
 
-Aquí se explica el concepto teórico necesario para
-comprender el experimento.
-
-\subsection{Modelo matemático}
-
-Las ecuaciones importantes se presentan de forma numerada.
-
+Los sistemas de control en tiempo discreto difieren de los continuos en que sus variables varían únicamente en instantes específicos \cite{ogata}. 
+El muestreo periódico de una señal analógica $x_a(t)$ permite obtener una secuencia en tiempo discreto $x(n)$, definida por la relación:
 \begin{equation}
-G(s)=\frac{K}{\tau s+1}
-\label{eq:modelo}
+    x(n) = x_a(nT)
+\end{equation}
+Donde $T$ es el periodo de muestreo. Para comprender este proceso es importante analizar el comportamiento de la señal tanto en el dominio del tiempo como en el dominio de la frecuencia \cite{fadali}.
+
+\subsection{Teorema del Muestreo y Criterio de Nyquist-Shannon}
+
+El Criterio de Nyquist-Shannon establece que, para recuperar exactamente una señal analógica de ancho de banda limitado a partir de sus muestras,
+la frecuencia de muestreo ($f_s$) debe ser estrictamente mayor que el doble de la frecuencia máxima contenida en la señal ($f_{max}$) \cite{garcia}. Matemáticamente, esto se expresa como:
+\begin{equation}
+    f_s > 2f_{max}
 \end{equation}
 
-donde $K$ representa la ganancia del sistema y $\tau$
-la constante de tiempo.
+Si esta condición no se cumple, las réplicas del espectro de la señal en el dominio de la frecuencia se solapan. Este fenómeno,
+conocido como \textit{aliasing} (o solapamiento), produce componentes de baja frecuencia espurias en la señal reconstruida que no existían en la señal analógica original,
+lo que imposibilita la reconstrucción exacta por parte del circuito retenedor \cite{alvarado}.
 
-La ecuación \ref{eq:modelo} corresponde al modelo
-de primer orden utilizado para representar el sistema.
+\subsection{Análisis en el Dominio de la Frecuencia y la Transformada Rápida de Fourier (FFT)}
+
+En la instrumentación electrónica moderna, este proceso se ejecuta computacionalmente mediante el algoritmo de la Transformada Rápida de Fourier (FFT). 
+Esta misma reduce drásticamente la complejidad computacional del análisis espectral, permitiendo a osciloscopios digitales con capacidades avanzadas\cite{astrom}.
+
+\subsection{Espectro de Frecuencia y Armónicos en la Retención}
+
+Cuando una señal senoidal analógica es muestreada por un interruptor bilateral (como el CD4066) controlado por un tren de pulsos (generado, por ejemplo,
+mediante un multivibrador astable NE555), la operación equivale matemáticamente a la multiplicación de la señal original por un tren de impulsos periódico \cite{ogata}.
+
+En el dominio de la frecuencia, esta multiplicación se traduce en la convolución del espectro de la señal original con el espectro del tren de pulsos.
+Como resultado, el espectro de la señal muestreada contiene la frecuencia fundamental original y un número infinito de réplicas exactas (armónicos) centradas alrededor de los múltiplos de la frecuencia de muestreo ($f_s, 2f_s, 3f_s, \dots$) \cite{alvarado}.
 
 \section{Metodología}
 
@@ -260,26 +272,6 @@ un único pico referente a la frecuencia real de la señal.
     \caption{Espectro de la señal obtenida mediante la función math del osciloscopio.}
     \label{fig:fft}
 \end{figure}
-
-
-% =========================================================
-% V. DISCUSIÓN DE LOS RESULTADOS
-% =========================================================
-
-\section{Discusión de los resultados}
-
-En esta sección se interpretan los resultados obtenidos.
-
-Se comparan los valores teóricos con los valores
-experimentales y se analizan las diferencias encontradas.
-
-También se analiza el comportamiento del sistema frente
-a cambios en las condiciones de operación.
-
-
-% =========================================================
-% VI. ANÁLISIS DE ERRORES
-% =========================================================
 
 
 % =========================================================
