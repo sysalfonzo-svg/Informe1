@@ -1,0 +1,517 @@
+\documentclass[10pt,conference]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{hyperref}
+\graphicspath{{C:/Users/Sneider/OneDrive/Documentos/Informes_lateX/Taller1/}}
+
+% ---------- Estilo para el codigo de MATLAB ----------
+\lstdefinestyle{matlabstyle}{
+    language=Matlab,
+    backgroundcolor=\color{white},
+    basicstyle=\ttfamily\scriptsize,
+    commentstyle=\color{gray},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=6pt,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=2
+}
+\lstset{style=matlabstyle}
+
+% ---------- Comando para dejar el espacio de la imagen ----------
+% Reemplaza el contenido del \fbox por \includegraphics{nombre_archivo.png}
+% cuando ya tengas las imagenes exportadas de MATLAB.
+\newcommand{\imgplaceholder}[1]{%
+\fbox{\parbox[c][3.3cm][c]{0.95\linewidth}{\centering\textit{Espacio para imagen: #1}}}%
+}
+
+\begin{document}
+
+\title{Taller Muestreo}
+
+\author{
+\IEEEauthorblockN{Jefferson Velasquez, Sneider Sanabria, Daniela Calderon}
+\IEEEauthorblockA{\textit{Control Digital - Ing Jairo Cuero}\\
+Jevelasquez.quevedo@unillanos.edu.co\\
+sy.salfonzo@unillanos.edu.co\\
+dscalderon.moreno@unillanos.edu.co}
+}
+
+\maketitle
+
+\begin{abstract}
+En este taller se estudió el proceso de muestreo y recuperación de señales mediante simulaciones utilizando la herramienta de MATLAB. Se analizaron diferentes frecuencias de muestreo y señales sinusoidales, comparando las señales originales, muestreadas y recuperadas. Con esto, se observaron los cambios producidos en las señales según las condiciones de muestreo.
+\end{abstract}
+
+\section{Resultados}
+
+% ============================================================
+\noindent\textbf{1. Simular el muestreo de la señal $y(t)$ a una frecuencia de muestreo de 10 Hz y graficarla.}
+
+\[ y(t) = \sin(4\pi t) + \sin(8\pi t) \]
+
+\begin{lstlisting}
+clear;
+clc;
+close all;
+
+a = -1;
+b = 1;
+f1 = 2;
+f2 = 4;
+fc = 100*f2;
+tc = 1/fc;
+t = a:tc:b;
+Fs = 10;
+Ts = 1/Fs;
+td = a:Ts:b;
+
+yc = sin(2*pi*f1*t) + sin(2*pi*f2*t);
+yd = sin(2*pi*f1*td) + sin(2*pi*f2*td);
+
+figure(1);
+plot(t,yc,'LineWidth',1.5);
+hold on;
+stem(td,yd,'filled','LineWidth',1.2);
+hold off;
+grid on;
+xlabel('Tiempo [s]');
+ylabel('Amplitud');
+title('Muestreo de y(t) con Fs = 10 Hz');
+legend('Senal original y(t)', ...
+    'Muestras y[n]');
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_1.png}
+\caption{Gráfica de la función $y(t)=\sin(4\pi t)+\sin(8\pi t)$ muestreada a $Fs = 10$ Hz.}
+\label{Figure_1}
+\end{figure}
+
+% ============================================================
+\noindent\textbf{2. Recuperar la señal analógica $y(t)$ utilizando las muestras obtenidas en el punto 1 y aplicando la sumatoria de funciones de interpolación.}
+
+\begin{lstlisting}
+clear;
+clc;
+close all;
+
+a = -1;
+b = 1;
+f1 = 2;
+f2 = 4;
+fc = 100*f2;
+tc = 1/fc;
+t = a:tc:b;
+yc = sin(2*pi*f1*t) + ...
+    sin(2*pi*f2*t);
+Fs = 10;
+Ts = 1/Fs;
+td = a:Ts:b;
+yd = sin(2*pi*f1*td) + ...
+    sin(2*pi*f2*td);
+
+figure(1);
+subplot(2,1,1);
+plot(t,yc,'LineWidth',1.5);
+grid on;
+xlabel('Tiempo [s]');
+ylabel('Amplitud');
+title('Senal original y(t)');
+subplot(2,1,2);
+stem(td,yd,'filled','LineWidth',1.2);
+grid on;
+xlabel('Tiempo [s]');
+ylabel('Amplitud');
+title('Senal muestreada con Fs = 10 Hz');
+
+[xm,xn] = meshgrid(t,td);
+aux = pi*Fs*(xm-xn);
+aux = aux + eps;
+S = sin(aux)./aux;
+yr = yd*S;
+
+figure(2);
+plot(t,yc,'LineWidth',1.5);
+hold on;
+stem(td,yd,'filled','LineWidth',1);
+plot(t,yr,'--','LineWidth',1.5);
+hold off;
+grid on;
+xlabel('Tiempo [s]');
+ylabel('Amplitud');
+title('Senal original, muestreada y recuperada');
+legend('Senal original', ...
+    'Muestras', ...
+    'Senal recuperada');
+
+fprintf('Frecuencia componente 1: %.2f Hz\n',f1);
+fprintf('Frecuencia componente 2: %.2f Hz\n',f2);
+fprintf('Frecuencia maxima: %.2f Hz\n',max(f1,f2));
+fprintf('Frecuencia de Nyquist: %.2f Hz\n',2*max(f1,f2));
+fprintf('Frecuencia de muestreo: %.2f Hz\n',Fs);
+fprintf('Periodo de muestreo: %.3f s\n',Ts);
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_2.png}
+\caption{Gráfica de la función $y(t)=\sin(4\pi t)+\sin(8\pi t)$ con muestreo cada 10 Hz y la señal reconstruida.}
+\label{Figure_2}
+\end{figure}
+
+% ============================================================
+\noindent\textbf{3. Simular el muestreo de una onda sinusoidal pura de 300 Hz. Utilizar una frecuencia de muestreo de 800 Hz.}
+
+\begin{lstlisting}
+clear all
+clc
+clf
+
+a = 0;
+b = 0.02;
+f0 = 300;
+Fs = 800;
+Ts = 1/Fs;
+fc = 100*f0;
+tc = 1/fc;
+t = a:tc:b;
+td = a:Ts:b;
+
+yc = sin(2*pi*f0*t);
+yd = sin(2*pi*f0*td);
+linea = zeros(size(t));
+
+figure(1)
+subplot(2,1,1)
+plot(t,yc,'b')
+hold on
+plot(t,linea,'k')
+hold off
+title('Senal sinusoidal pura de 300 Hz')
+xlabel('Tiempo [s]')
+ylabel('Amplitud')
+grid on
+
+subplot(2,1,2)
+stem(td,yd,'r')
+title('Senal muestreada a 800 Hz')
+xlabel('Tiempo [s]')
+ylabel('Amplitud')
+grid on
+
+[xm,xn] = meshgrid(t,td);
+aux = (pi*Fs)*(xm-xn) + eps;
+y = yd*(sin(aux)./aux);
+
+figure(2)
+plot(t,yc,'b','LineWidth',1.5)
+hold on
+plot(t,y,'r','LineWidth',1.5)
+hold off
+title('Senal original y senal reconstruida')
+xlabel('Tiempo [s]')
+ylabel('Amplitud')
+legend('Senal original de 300 Hz',...
+    'Senal reconstruida')
+grid on
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_3.png}
+\caption{Gráfica del muestreo de una señal sinusoidal pura de 300 Hz con una frecuencia de muestreo de 800 Hz.}
+\label{fig:3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_4.png}
+\caption{Gráfica de la comparación entre la señal original y la señal reconstruida.}
+\label{fig:4}
+\end{figure}
+
+% ============================================================
+\noindent\textbf{4. Simular el muestreo de las ondas sinusoidales puras cuyas frecuencias se indican en los incisos a, b, c, d y e a una frecuencia de muestreo de 800 Hz.}
+
+\begin{itemize}
+    \item[a.] 125 Hz
+    \item[b.] 215 Hz
+    \item[c.] 305 Hz
+    \item[d.] 395 Hz
+    \item[e.] 500 Hz
+\end{itemize}
+
+\noindent Observar los cambios en las formas de onda de la señal muestreada y la señal recuperada. Graficar en la misma ventana la señal original, la señal muestreada y la señal recuperada.
+
+\begin{lstlisting}
+clc
+clf
+
+a = -1;
+b = 1;
+f1 = 4.7;
+f2 = 2;
+fc = 100*f1;
+tc = 1/fc;
+t = a:tc:b;
+Fs = 10;
+Ts = 1/Fs;
+td = a:Ts:b;
+
+yc = sin(2*pi*f1*t) + sin(2*pi*f2*t);
+yd = sin(2*pi*f1*td) + sin(2*pi*f2*td);
+linea = zeros(size(t));
+
+figure(1)
+subplot(2,1,1)
+plot(t,yc,t,linea)
+subplot(2,1,2)
+stem(td,yd)
+
+[xm,xn] = meshgrid(t,td);
+aux = (pi*Fs)*(xm-xn) + eps;
+y = yd*(sin(aux)./aux);
+
+figure(2)
+plot(t,yc,'b')
+hold on
+plot(t,y,'r')
+hold off
+
+
+frec4 = [125 215 305 395 500];
+Fs4 = 800;
+Ts4 = 1/Fs4;
+
+a4 = 0;
+b4 = 0.05;          % ventana de 50ms, suficiente para ver varios ciclos
+fc4 = 20000;        % "frecuencia continua" para simular la senal analogica
+tc4 = 1/fc4;
+
+t4 = a4:tc4:b4;
+td4 = a4:Ts4:b4;
+
+for k = 1:length(frec4)
+
+    f = frec4(k);
+
+    yc4 = sin(2*pi*f*t4);
+    yd4 = sin(2*pi*f*td4);
+
+    [xm4,xn4] = meshgrid(t4,td4);
+    aux4 = (pi*Fs4)*(xm4-xn4)+eps;
+    yr4 = yd4*(sin(aux4)./aux4);
+
+    figure(2+k)
+    plot(t4,yc4,'b')
+    hold on
+    stem(td4,yd4,'k')
+    plot(t4,yr4,'r--')
+    hold off
+    legend('Senal original','Muestras','Senal recuperada')
+    title(['Punto 4 - f = ',num2str(f),' Hz, Fs = 800 Hz'])
+    xlabel('t (s)')
+    ylabel('Amplitud')
+
+end
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_5.png}
+\caption{Señal original, señal muestreada y señal reconstruida para $f = 125$ Hz con $Fs = 800$ Hz.}
+\label{fig:5a}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_6.png}
+\caption{Señal original, señal muestreada y señal reconstruida para $f = 215$ Hz con $Fs = 800$ Hz.}
+\label{fig:5b}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_7.png}
+\caption{Señal original, señal muestreada y señal reconstruida para $f = 305$ Hz con $Fs = 800$ Hz.}
+\label{fig:5c}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_8.png}
+\caption{Señal original, señal muestreada y señal reconstruida para $f = 395$ Hz con $Fs = 800$ Hz. Al acercarse a la frecuencia de Nyquist (400 Hz) la reconstrucción empieza a perder fidelidad.}
+\label{fig:5d}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_9.png}
+\caption{Señal original, señal muestreada y señal reconstruida para $f = 500$ Hz con $Fs = 800$ Hz. Al superar la frecuencia de Nyquist (400 Hz) se presenta aliasing y la reconstrucción ya no corresponde a la señal original.}
+\label{fig:5e}
+\end{figure}
+
+% ============================================================
+\noindent\textbf{5. Repetir el punto anterior pero ahora con un periodo de muestreo de 1 ms y con las frecuencias de:}
+
+\begin{itemize}
+    \item[a.] 7525 Hz
+    \item[b.] 7650 Hz
+    \item[c.] 7775 Hz
+    \item[d.] 7900 Hz
+\end{itemize}
+
+\noindent Observar los cambios en las formas de onda de la señal muestreada y la señal recuperada. Graficar en la misma ventana la señal original, la señal muestreada y la señal recuperada.
+
+\begin{lstlisting}
+
+frec5 = [7525 7650 7775 7900];
+Ts5 = 1e-3;
+Fs5 = 1/Ts5;
+
+a5 = 0;
+b5 = 0.02;           % ventana de 20ms
+fc5 = 200000;
+tc5 = 1/fc5;
+
+t5 = a5:tc5:b5;
+td5 = a5:Ts5:b5;
+
+for k = 1:length(frec5)
+
+    f = frec5(k);
+
+    yc5 = sin(2*pi*f*t5);
+    yd5 = sin(2*pi*f*td5);
+
+    [xm5,xn5] = meshgrid(t5,td5);
+    aux5 = (pi*Fs5)*(xm5-xn5)+eps;
+    yr5 = yd5*(sin(aux5)./aux5);
+
+    figure(7+k)
+    plot(t5,yc5,'b')
+    hold on
+    stem(td5,yd5,'k')
+    plot(t5,yr5,'r--')
+    hold off
+    legend('Senal original','Muestras','Senal recuperada')
+    title(['Punto 5 - f = ',num2str(f),' Hz, Ts = 1ms (Fs = 1000 Hz)'])
+    xlabel('t (s)')
+    ylabel('Amplitud')
+
+end
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_10.png}
+\caption{Señal original, señal muestreada y señal reconstruida para $f = 7525$ Hz con $Ts = 1$ ms ($Fs = 1000$ Hz). Se observa aliasing: la señal reconstruida corresponde a una frecuencia mucho menor a la real.}
+\label{fig:6a}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_11.png}
+\caption{Señal original, señal muestreada y señal reconstruida para $f = 7650$ Hz con $Ts = 1$ ms ($Fs = 1000$ Hz). Se observa aliasing.}
+\label{fig:6b}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_12.png}
+\caption{Señal original, señal muestreada y señal reconstruida para $f = 7775$ Hz con $Ts = 1$ ms ($Fs = 1000$ Hz). Se observa aliasing.}
+\label{fig:6c}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_13.png}
+\caption{Señal original, señal muestreada y señal reconstruida para $f = 7900$ Hz con $Ts = 1$ ms ($Fs = 1000$ Hz). Se observa aliasing.}
+\label{fig:6d}
+\end{figure}
+
+% ============================================================
+\noindent\textbf{6. Encontrar tres señales diferentes que tengan la misma representación discreta.}
+
+\begin{lstlisting}
+clear all
+clc
+close all
+
+Fs = 800;
+Ts = 1/Fs;
+t = 0:0.00001:0.02;
+td = 0:Ts:0.02;
+
+f1 = 125;
+f2 = 925;
+f3 = 1725;
+
+x1 = sin(2*pi*f1*t);
+x2 = sin(2*pi*f2*t);
+x3 = sin(2*pi*f3*t);
+
+xd1 = sin(2*pi*f1*td);
+xd2 = sin(2*pi*f2*td);
+xd3 = sin(2*pi*f3*td);
+
+figure
+subplot(2,1,1)
+plot(t,x1,'LineWidth',1.2)
+hold on
+plot(t,x2,'LineWidth',1.2)
+plot(t,x3,'LineWidth',1.2)
+hold off
+grid on
+title('Senales continuas')
+xlabel('Tiempo [s]')
+ylabel('Amplitud')
+legend('125 Hz','925 Hz','1725 Hz')
+
+subplot(2,1,2)
+stem(td,xd1,'filled')
+hold on
+stem(td,xd2)
+stem(td,xd3)
+hold off
+grid on
+title('Representacion discreta de las tres senales')
+xlabel('Tiempo [s]')
+ylabel('Amplitud')
+legend('125 Hz','925 Hz','1725 Hz')
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{Figure_14.png}
+\caption{Gráfica de la representación discreta de 3 señales diferentes con una frecuencia de muestreo de 800 Hz.}
+\label{fig:7}
+\end{figure}
+
+\section{Conclusiones}
+
+\begin{itemize}
+    \item Para el muestreo de la señal $y(t)$ se utilizó una frecuencia de 10 Hz, superior a la frecuencia de Nyquist requerida de 8 Hz. Esto permitió obtener muestras representativas de la señal original sin presentar aliasing y conservar la información necesaria para su posterior reconstrucción.
+
+    \item La reconstrucción mediante interpolación sinc permitió recuperar satisfactoriamente la forma de la señal analógica a partir de las muestras obtenidas. La similitud entre la señal original y la reconstruida confirma que, al cumplir el criterio de Nyquist, es posible recuperar una señal continua a partir de su representación discreta.
+
+    \item A partir de la simulación de una señal sinusoidal pura de 300 Hz muestreada a una frecuencia de 800 Hz, se comprobó que la frecuencia de muestreo es superior al doble de la frecuencia de la señal, cumpliendo el teorema de Nyquist. Esto permitió que la señal muestreada conservara adecuadamente la información de la señal original y pudiera ser reconstruida sin distorsiones significativas.
+
+    \item Mediante la simulación de las señales de 200 Hz, 1000 Hz y 1800 Hz, con una frecuencia de muestreo de 800 Hz, se comprobó que, aunque las tres señales presentan diferentes frecuencias, al ser muestreadas generan los mismos valores en los instantes de muestreo, debido a que superan la frecuencia de Nyquist, presentándose el fenómeno de aliasing.
+\end{itemize}
+
+\end{document}
